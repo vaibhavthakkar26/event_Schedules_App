@@ -1,6 +1,5 @@
-import React, { createRef, useEffect, useRef } from 'react'
+import React  from 'react'
 import FullCalendar from '@fullcalendar/react'
-import { Draggable } from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -24,16 +23,17 @@ export function EventsCalender({eventsList,editEventsHandler}) {
   }
 
   const eventDropHandler = async (info) =>{
-    console.log("Id",info.event.id);
     const id = info.event.id;
     const {start: newStart,end: newEnd} = info.event._instance.range;
-    const startDate = new Date (newStart);
-    console.log("startDate",startDate);
-    const endDate = new Date (newEnd);
-    console.log("startDate",endDate);
+    const {start,end} = info.oldEvent._instance.range;
+    const startDate = newStart;
+    const endDate = newEnd;
     const editData={
       startDate,
       endDate
+    }
+    if (new Date(start).getDate() === new Date(newStart).getDate()) {
+                  info.revert();
     }
     await editEventApiHandler(id,editData);
   }
@@ -50,22 +50,6 @@ export function EventsCalender({eventsList,editEventsHandler}) {
         }}
         events={events}
         eventDrop={eventDropHandler}
-      //   eventDrop={
-      //     info =>{
-      //         console.log("info",info.event.id);
-      //         const {start,end} = info.oldEvent._instance.range;
-      //         console.log(start, end);
-      //         const {
-      //            start: newStart,
-      //             end: newEnd
-      //         } = info.event._instance.range;
-      //         console.log(newStart, newEnd);
-
-      //         if (new Date(start).getDate() === new Date(newStart).getDate()) {
-      //             info.revert();
-      //         }
-      //         }
-      // }
         selectable={true}
         selectMirror={true}
         eventContent={renderEventContent}

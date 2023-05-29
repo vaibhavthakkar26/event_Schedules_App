@@ -29,7 +29,6 @@ function CreateEvents({ open, handleClose,editEventData}) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("High");
-  const [priorityError, setPriorityError] = useState("");
   const [descriptionError, setDescriptionError] = useState("");
   const [titleError, setTitleError] = useState("");
   const [endEventDateError, setEndEventDateError] = useState("");
@@ -75,6 +74,10 @@ function CreateEvents({ open, handleClose,editEventData}) {
     setEndEventDate(date);
   };
 
+  
+
+  
+
   const validation = () => {
     let validate = true;
     if (!title) {
@@ -85,10 +88,6 @@ function CreateEvents({ open, handleClose,editEventData}) {
       setDescriptionError("please Enter Description");
       validate = false;
     }
-    // if (!priority) {
-    //   setPriorityError("please select priority");
-    //   validate = false;
-    // }
     if (!startEventDate) {
       setStartEventDateError("please select Start Event Date");
       validate = false;
@@ -200,7 +199,6 @@ function CreateEvents({ open, handleClose,editEventData}) {
                         ))
                       }
                      </Select>
-                    {priorityError && <TextError message={priorityError} />}
                   </Box>
                   <Box>
                     <Button type="submit" variant="outlined" onClick={() => submitHandler()}>
