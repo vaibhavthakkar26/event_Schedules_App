@@ -75,3 +75,29 @@ export const put = async (url, data) => {
     }
   }
 };
+
+
+export const DELETE = async (id) => {
+  try {
+    const response = await axios.delete(id);
+    if (response.data.success) {
+      return {
+        success: response.data.success,
+        data : response.data.data,
+        message : response.data.message
+      }
+    } else {
+      return {
+        success: response.data.success,
+        data : response.data.data,
+        message : response.data.message
+      }
+    }
+  } catch (error) {
+    return {
+      success: false,
+      data : [],
+      message : 'something_Went_wrong'
+    }
+  }
+};

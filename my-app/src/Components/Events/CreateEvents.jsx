@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
 import Backdrop from "@mui/material/Backdrop";
@@ -7,8 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import { Button, Select, TextField } from "@mui/material";
-import moment from "moment";
-import { createEventApiHandler } from "../../service/api.service";
+import { createEventApiHandler, editEventApiHandler, eventsDeleteById, priorityListHandler } from "../../service/api.service";
 import SuccessFull from "../SuccessFull";
 import Error from "../Error";
 import TextError from "../TextError";
@@ -24,12 +23,12 @@ export const style = {
   p: 4,
 };
 
-function CreateEvents({ open, handleClose }) {
+function CreateEvents({ open, handleClose,editEventData}) {
   const [startEventDate, setStartEventDate] = useState("");
   const [endEventDate, setEndEventDate] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("");
+  const [priority, setPriority] = useState("High");
   const [priorityError, setPriorityError] = useState("");
   const [descriptionError, setDescriptionError] = useState("");
   const [titleError, setTitleError] = useState("");
@@ -38,15 +37,42 @@ function CreateEvents({ open, handleClose }) {
   const [eventStatus, setEventStatus] = useState();
   const [successFullEvent, setSuccessfullEvent] = useState(false);
   const [errorEvent, setErrorEvent] = useState(false);
+  const [priorityList,setPriorityList] = useState([]);
 
   const startEventHandler = (date) => {
     setStartEventDate(date);
-    console.log("startDate", moment(date).format("YYYY-MM-DDThh:mm:ssTZD"));
   };
+
+  useEffect(()=>{
+    editDataHandler();
+    priorityListData();
+  },[editEventData]);
+
+  const priorityListData = async() =>{
+    const result = await priorityListHandler();
+    setPriorityList(result.data);
+  };
+
+
+  const eventDeleteHandler = async (id) =>{
+     const response = await eventsDeleteById(id);
+     if(response.success){
+      handleClose();
+     }
+  }
+
+  const editDataHandler = () =>{
+    if(editEventData){
+      setDescription(editEventData.description);
+      setPriority(editEventData.priorityName);
+      setTitle(editEventData.title);
+      setEndEventDate(new Date(editEventData.endDate));
+      setStartEventDate(new Date(editEventData.startDate));
+    }
+  }
 
   const EndEventHandler = (date) => {
     setEndEventDate(date);
-    console.log("date", date);
   };
 
   const validation = () => {
@@ -59,10 +85,10 @@ function CreateEvents({ open, handleClose }) {
       setDescriptionError("please Enter Description");
       validate = false;
     }
-    if (!priority) {
-      setPriorityError("please select priority");
-      validate = false;
-    }
+    // if (!priority) {
+    //   setPriorityError("please select priority");
+    //   validate = false;
+    // }
     if (!startEventDate) {
       setStartEventDateError("please select Start Event Date");
       validate = false;
@@ -162,23 +188,28 @@ function CreateEvents({ open, handleClose }) {
                     <Select
                       labelId="demo-simple-select-helper-label"
                       id="demo-simple-select-helper"
-                      value={priority || "High"}
+                      value={priority}
                       onChange={(e) => setPriority(e.target.value)}
                       fullWidth
                       style={{marginTop:"10px"}}
                       size="small"
                     >
-                      <MenuItem value={"High"}>High</MenuItem>
-                      <MenuItem value={"Medium"}>Medium</MenuItem>
-                      <MenuItem value={"Low"}>Low</MenuItem>
-                    </Select>
-                    {priorityError && <titleError message={priorityError} />}
+                      {
+                        priorityList?.map((res)=>(
+                          <MenuItem value={res.name} key={`p_${res.name}`}>{res.name}</MenuItem>
+                        ))
+                      }
+                     </Select>
+                    {priorityError && <TextError message={priorityError} />}
                   </Box>
                   <Box>
-                    <Button type="submit" onClick={() => submitHandler()}>
-                      {" "}
-                      submit{" "}
+                    <Button type="submit" variant="outlined" onClick={() => submitHandler()}>
+                      submit
                     </Button>
+                    {
+                      editEventData && 
+                            <Button onClick={() =>eventDeleteHandler(editEventData.id)}> Delete </Button>
+                    }
                   </Box>
                 </Box>
               </Box>
@@ -196,24 +227,40 @@ function CreateEvents({ open, handleClose }) {
         description,
         startDate: startEventDate,
         endDate: endEventDate,
-        // startDate : moment(startEventDate).format('YYYY-MM-DDThh:mm:ssTZD'),
-        // endDate : moment(endEventDate).format('YYYY-MM-DDThh:mm:ssTZD')
       };
 
-      const createApiData = await createEventApiHandler(data);
-      if (createApiData.success) {
-        setSuccessfullEvent(true);
-        setEventStatus(1);
-        setTimeout(() => {
-          handleClose();
-        }, 3000);
-      } else {
-        setErrorEvent(true);
-        setEventStatus(2);
-        setTimeout(() => {
-          handleClose();
-        }, 3000);
+      if(editEventData){
+        const eventsData =  await editEventApiHandler(editEventData.id,data);
+        if (eventsData.success) {
+          setSuccessfullEvent(true);
+          setEventStatus(1);
+          setTimeout(() => {
+            handleClose();
+          }, 3000);
+        } else {
+          setErrorEvent(true);
+          setEventStatus(2);
+          setTimeout(() => {
+            handleClose();
+          }, 3000);
+        }
+      }else{
+        const eventsData = await createEventApiHandler(data);
+        if (eventsData.success) {
+          setSuccessfullEvent(true);
+          setEventStatus(1);
+          setTimeout(() => {
+            handleClose();
+          }, 3000);
+        } else {
+          setErrorEvent(true);
+          setEventStatus(2);
+          setTimeout(() => {
+            handleClose();
+          }, 3000);
+        }
       }
+
     }
   };
 
