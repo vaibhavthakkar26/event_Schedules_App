@@ -14,9 +14,8 @@ export function EventsCalender({eventsList,editEventsHandler}) {
 
 
   listsOfEvents.map((res)=>{
-    events.push({title:res.title,start:res.startDate,end:res.endDate,color:res.priorityColorCode,id:res.id})
+    events.push(...events,{title:res.title,start:res.startDate,end:res.endDate,color:res.priorityColorCode,id:res.id})
   })
-  
 
   const eventClickHandler = (clickInfo) =>{
     editEventsHandler(clickInfo.event.id)
@@ -44,9 +43,9 @@ export function EventsCalender({eventsList,editEventsHandler}) {
         initialView='dayGridMonth'
         weekends={true}
         headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          left: 'title',
+          center: '',
+          right: 'prev,next today,timeGridDay,timeGridWeek,dayGridMonth'
         }}
         events={events}
         eventDrop={eventDropHandler}
@@ -55,11 +54,6 @@ export function EventsCalender({eventsList,editEventsHandler}) {
         eventContent={renderEventContent}
         editable={true}
         eventClick={eventClickHandler}
-        header={{
-          left: "prev,next today",
-          center: "title",
-          right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
-        }}
       />
     </div>
   )
